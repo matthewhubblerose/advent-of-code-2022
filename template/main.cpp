@@ -10,6 +10,7 @@
 #include <queue>
 #include <deque>
 #include <stack>
+#include <algorithm>
 
 /*
  * Priority Queue
