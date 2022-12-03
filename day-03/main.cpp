@@ -1,16 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <sstream>
 #include <string>
-#include <map>
 #include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include <queue>
-#include <deque>
-#include <stack>
-#include <algorithm>
 
 std::set<char> to_char_set(std::string_view sv) {
     auto set = std::set<char>();
@@ -35,21 +27,25 @@ int main() {
     auto acc = static_cast<uint64_t>(0);
 
     auto line = std::string();
+    auto line_2 = std::string();
+    auto line_3 = std::string();
     while (std::getline(ifs, line)) {
-        auto s = std::string_view(line);
-        auto pack_1 = s.substr(0, s.size() / 2);
-        auto pack_2 = s.substr(s.size() / 2, s.size());
+        std::getline(ifs, line_2);
+        std::getline(ifs, line_3);
 
-        const auto chars_1 = to_char_set(pack_1);
-        const auto chars_2 = to_char_set(pack_2);
+        const auto chars_1 = to_char_set(line);
+        const auto chars_2 = to_char_set(line_2);
+        const auto chars_3 = to_char_set(line_3);
 
-        std::vector<char> intersection;
+        auto intersection_1 = std::vector<char>();
         std::set_intersection(chars_1.begin(), chars_1.end(), chars_2.begin(), chars_2.end(),
-                              std::back_inserter(intersection));
+                              std::back_inserter(intersection_1));
+        auto intersection_2 = std::vector<char>();
+        std::set_intersection(intersection_1.begin(), intersection_1.end(), chars_3.begin(), chars_3.end(),
+                              std::back_inserter(intersection_2));
 
-        assert(intersection.size() == 1);
-        acc += static_cast<uint64_t>(score(intersection[0]));
-
+        assert(intersection_2.size() == 1);
+        acc += static_cast<uint64_t>(score(intersection_2[0]));
     }
 
     std::cout << acc << '\n';
