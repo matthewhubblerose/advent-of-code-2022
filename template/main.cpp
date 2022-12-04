@@ -1,7 +1,5 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <sstream>
 #include <string>
 #include <map>
 #include <set>
@@ -12,20 +10,10 @@
 #include <stack>
 #include <algorithm>
 
-/*
- * Priority Queue
- * auto cmp = [](const Foo &left, const Foo &right) { return left.b > right.b; };
- * std::priority_queue<Foo, std::vector<Foo>, decltype(cmp)> pq(cmp);
- */
-
-int main() {
-    auto ifs = std::ifstream();
-    ifs.open("input.txt");
-
-    auto line = std::string();
-    while (std::getline(ifs, line)) {
-        auto ss = std::istringstream(line);
-
+void part_1() {
+    std::string line;
+    while (std::cin >> line) {
+//        auto ss = std::istringstream(line);
 //        auto token = std::string();
 //        std::getline(ss, token, ' ');
 
@@ -35,5 +23,14 @@ int main() {
     }
 
     std::cout << "" << '\n';
+}
+
+void part_2() {
+
+}
+
+int main() {
+    part_1();
+    part_2();
     return 0;
 }
