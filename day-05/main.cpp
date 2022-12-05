@@ -12,8 +12,8 @@ bool get_crate(std::string_view sv, size_t &out_index, char &out_crate) {
     return true;
 }
 
-std::vector<std::deque<char>> parse_stacks() {
-    auto stacks = std::vector<std::deque<char>>();
+std::vector<std::vector<char>> parse_stacks() {
+    auto stacks = std::vector<std::vector<char>>();
     std::string line;
 
     while (std::getline(std::cin, line) && line[1] != '1') {
@@ -22,7 +22,7 @@ std::vector<std::deque<char>> parse_stacks() {
         size_t stack_index = 0, line_index = 0;
         while (get_crate(line, line_index, crate)) {
             if (stacks.size() < stack_index + 1) stacks.emplace_back();
-            if (crate != ' ') stacks[stack_index].push_front(crate);
+            if (crate != ' ') stacks[stack_index].insert(stacks[stack_index].cbegin(), crate);
             ++stack_index;
         }
     }
@@ -34,16 +34,13 @@ void part_1() {
     auto stacks = parse_stacks();
 
     std::string s;
-    size_t count, src_num, dst_num;
+    size_t src_num, dst_num;
+    std::ptrdiff_t count;
     while (std::cin >> s >> count >> s >> src_num >> s >> dst_num) {
         auto &src = stacks[src_num - 1];
         auto &dst = stacks[dst_num - 1];
-        assert(count <= src.size());
-        while (count != 0) {
-            dst.push_back(src.back());
-            src.pop_back();
-            --count;
-        }
+        std::copy(src.rbegin(), src.rbegin() + count, std::back_inserter(dst));
+        src.erase(src.end() - count, src.end());
     }
 
     for (const auto &stack: stacks) std::cout << stack.back();
@@ -54,15 +51,13 @@ void part_2() {
     auto stacks = parse_stacks();
 
     std::string s;
-    size_t count, src_num, dst_num;
+    size_t src_num, dst_num;
+    std::ptrdiff_t count;
     while (std::cin >> s >> count >> s >> src_num >> s >> dst_num) {
         auto &src = stacks[src_num - 1];
         auto &dst = stacks[dst_num - 1];
-        assert(count <= src.size());
-        const auto index = static_cast<std::ptrdiff_t>(src.size() - count);
-        std::copy(src.begin() + index, src.end(), std::back_inserter(dst));
-        src.erase(src.begin() + index, src.end());
-
+        std::copy(src.end() - count, src.end(), std::back_inserter(dst));
+        src.erase(src.end() - count, src.end());
     }
     for (const auto &stack: stacks) std::cout << stack.back();
     std::cout << '\n';
