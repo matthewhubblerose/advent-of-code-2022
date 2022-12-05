@@ -1,32 +1,44 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <unordered_map>
 
-int main() {
-    auto ifs = std::ifstream();
-    ifs.open("input.txt");
+void part_1() {
+    static const auto points = std::unordered_map<char, int>{{'A', 1},
+                                                             {'B', 2},
+                                                             {'C', 3},
+                                                             {'X', 1},
+                                                             {'Y', 2},
+                                                             {'Z', 3}};
 
-    const auto points = std::unordered_map<char, uint64_t>{{'A', 1},
-                                                           {'B', 2},
-                                                           {'C', 3}};
-    const auto lose = std::unordered_map<char, char>{{'A', 'C'},
-                                                     {'B', 'A'},
-                                                     {'C', 'B'}};
-    const auto win = std::unordered_map<char, char>{{'A', 'B'},
-                                                    {'B', 'C'},
-                                                    {'C', 'A'}};
+    int score = 0;
+    char elf, you;
 
-    auto line = std::string();
-    auto score = static_cast<uint64_t>(0);
+    while (std::cin >> elf >> you) {
+        score += points.at(you);
+        if ((you == 'X' && elf == 'A') || (you == 'Y' && elf == 'B') || (you == 'Z' && elf == 'C')) {
+            score += 3;
+        } else if ((you == 'X' && elf == 'C') || (you == 'Y' && elf == 'A') || (you == 'Z' && elf == 'B')) {
+            score += 6;
+        }
+    }
 
-    while (std::getline(ifs, line)) {
-        auto ss = std::istringstream(line);
+    std::cout << score << '\n';
+}
 
-        char elf;
-        char result;
-        ss >> elf >> result;
+void part_2() {
+    static const auto points = std::unordered_map<char, int>{{'A', 1},
+                                                             {'B', 2},
+                                                             {'C', 3}};
+    static const auto lose = std::unordered_map<char, char>{{'A', 'C'},
+                                                            {'B', 'A'},
+                                                            {'C', 'B'}};
+    static const auto win = std::unordered_map<char, char>{{'A', 'B'},
+                                                           {'B', 'C'},
+                                                           {'C', 'A'}};
 
+    char elf, result;
+    int score = 0;
+
+    while (std::cin >> elf >> result) {
         if (result == 'X') {
             score += points.at(lose.at(elf));
         } else if (result == 'Y') {
@@ -39,5 +51,10 @@ int main() {
     }
 
     std::cout << score << '\n';
+}
+
+int main() {
+    part_1(); // 11475
+//    part_2(); // 16862
     return 0;
 }
