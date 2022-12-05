@@ -1,20 +1,15 @@
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <queue>
-#include <functional>
 
-int main() {
-    auto ifs = std::ifstream();
-    ifs.open("input.txt");
-
-    auto calories = std::priority_queue<int64_t, std::vector<int64_t>, std::greater<>>();
-    auto acc = static_cast<int64_t>(0);
+void solve(size_t size) {
+    auto calories = std::priority_queue<int, std::vector<int>, std::greater<>>();
+    int acc = 0;
 
     auto line = std::string();
-    while (std::getline(ifs, line)) {
+    while (std::getline(std::cin, line)) {
         if (line.empty()) {
-            if (calories.size() < 3) {
+            if (calories.size() < size) {
                 calories.push(acc);
             } else if (acc > calories.top()) {
                 calories.pop();
@@ -22,16 +17,28 @@ int main() {
             }
             acc = 0;
         } else {
-            acc += std::stol(line);
+            acc += std::stoi(line);
         }
     }
 
-    auto total = static_cast<int64_t>(0);
+    int total = 0;
     while (!calories.empty()) {
         total += calories.top();
         calories.pop();
     }
-
     std::cout << total << '\n';
+}
+
+void part_1() {
+    solve(1);
+}
+
+void part_2() {
+    solve(3);
+}
+
+int main() {
+//    part_1(); // 71924
+    part_2(); // 210406
     return 0;
 }
