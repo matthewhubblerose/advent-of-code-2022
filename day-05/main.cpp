@@ -34,18 +34,19 @@ void part_1() {
     auto stacks = parse_stacks();
 
     std::string s;
-    size_t count, src, dst;
-    while (std::cin >> s >> count >> s >> src >> s >> dst) {
+    size_t count, src_num, dst_num;
+    while (std::cin >> s >> count >> s >> src_num >> s >> dst_num) {
+        auto &src = stacks[src_num - 1];
+        auto &dst = stacks[dst_num - 1];
+        assert(count <= src.size());
         while (count != 0) {
-            stacks[dst - 1].push_back(stacks[src - 1].back());
-            stacks[src - 1].pop_back();
+            dst.push_back(src.back());
+            src.pop_back();
             --count;
         }
     }
 
-    for (const auto &stack: stacks) {
-        std::cout << stack.back();
-    }
+    for (const auto &stack: stacks) std::cout << stack.back();
     std::cout << '\n';
 }
 
@@ -57,19 +58,18 @@ void part_2() {
     while (std::cin >> s >> count >> s >> src_num >> s >> dst_num) {
         auto &src = stacks[src_num - 1];
         auto &dst = stacks[dst_num - 1];
+        assert(count <= src.size());
         const auto index = static_cast<std::ptrdiff_t>(src.size() - count);
         std::copy(src.begin() + index, src.end(), std::back_inserter(dst));
         src.erase(src.begin() + index, src.end());
 
     }
-    for (const auto &stack: stacks) {
-        std::cout << stack.back();
-    }
+    for (const auto &stack: stacks) std::cout << stack.back();
     std::cout << '\n';
 }
 
 int main() {
-//    part_1(); // QGTHFZBHV
-    part_2(); // MGDMPSZTM
+    part_1(); // QGTHFZBHV
+//    part_2(); // MGDMPSZTM
     return 0;
 }
