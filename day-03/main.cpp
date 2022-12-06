@@ -4,11 +4,7 @@
 #include <set>
 
 std::set<char> to_char_set(std::string_view sv) {
-    std::set<char> set;
-    for (const auto c: sv) {
-        set.insert(c);
-    }
-    return set;
+    return {sv.cbegin(), sv.cend()};
 }
 
 int score(char c) {
