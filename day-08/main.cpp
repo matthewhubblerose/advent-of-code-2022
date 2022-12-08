@@ -1,14 +1,8 @@
 #include <iostream>
-#include <sstream>
 #include <vector>
 #include <unordered_set>
+#include <set>
 #include <algorithm>
-
-std::string coord(size_t x, size_t y) {
-    std::ostringstream oss;
-    oss << x << ',' << y;
-    return oss.str();
-}
 
 std::vector<std::vector<int>> parse_grid() {
     std::vector<std::vector<int>> grid;
@@ -26,26 +20,23 @@ std::vector<std::vector<int>> parse_grid() {
 void part_1() {
     const auto grid = parse_grid();
 
-    std::unordered_set<std::string> visible;
-
-    std::vector<std::pair<int, int>> d = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
-
+    std::set<std::pair<int, int>> visible;
     for (size_t y = 0; y < grid.size(); ++y) {
         const auto &row = grid[y];
         int max = -1;
         for (size_t x = 0; x < row.size(); ++x) {
             if (grid[x][y] > max) {
                 max = grid[x][y];
-                visible.insert(coord(x, y));
+                visible.insert(std::pair(x, y));
             } else if (grid[x][y] == 9) {
                 break;
             }
         }
         max = -1;
-        for (size_t x = row.size(); x-- > 0;) {
+        for (size_t x = row.size() - 1; x != std::numeric_limits<size_t>::max(); --x) {
             if (grid[x][y] > max) {
                 max = grid[x][y];
-                visible.insert(coord(x, y));
+                visible.insert(std::pair(x, y));
             } else if (grid[x][y] == 9) {
                 break;
             }
@@ -57,16 +48,16 @@ void part_1() {
         for (size_t y = 0; y < grid.size(); ++y) {
             if (grid[x][y] > max) {
                 max = grid[x][y];
-                visible.insert(coord(x, y));
+                visible.insert(std::pair(x, y));
             } else if (grid[x][y] == 9) {
                 break;
             }
         }
         max = -1;
-        for (size_t y = grid.size(); y-- > 0;) {
+        for (size_t y = grid.size() - 1; y != std::numeric_limits<size_t>::max(); --y) {
             if (grid[x][y] > max) {
                 max = grid[x][y];
-                visible.insert(coord(x, y));
+                visible.insert(std::pair(x, y));
             } else if (grid[x][y] == 9) {
                 break;
             }
