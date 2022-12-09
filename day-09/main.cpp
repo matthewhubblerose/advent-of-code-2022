@@ -3,93 +3,63 @@
 #include <set>
 #include <unordered_map>
 
-void part_1() {
-    const std::unordered_map<char, std::pair<int, int>> deltas = {
-            {'U', {0,  1}},
-            {'R', {1,  0}},
-            {'D', {0,  -1}},
-            {'L', {-1, 0}}
-    };
-    std::set<std::pair<int, int>> visited = {{0, 0}};
-    int hx = 0, hy = 0, tx = 0, ty = 0;
-    char direction;
-    int count;
-    while (std::cin >> direction >> count) {
-        const auto &delta = deltas.at(direction);
-        for (int i = 0; i < count; ++i) {
-            hx += delta.first;
-            hy += delta.second;
-            if (hx == tx) {
-                if (hy - ty < -1) --ty;
-                else if (hy - ty > 1) ++ty;
-            } else if (hy == ty) {
-                if (hx - tx < -1) --tx;
-                else if (hx - tx > 1) ++tx;
-            } else if (std::abs(hy - ty) == 1 && std::abs(hx - tx) > 1) {
-                ty = hy;
-                if (hx - tx > 1) ++tx;
-                else if (hx - tx < -1) --tx;
-            } else if (std::abs(hx - tx) == 1 && std::abs(hy - ty) > 1) {
-                tx = hx;
-                if (hy - ty > 1) ++ty;
-                else if (hy - ty < -1) --ty;
-            }
-            visited.insert({tx, ty});
-        }
-    }
+struct Point {
+    int x, y;
 
-    std::cout << visited.size() << '\n';
+    bool operator<(const Point &rhs) const {
+        return std::tie(x, y) < std::tie(rhs.x, rhs.y);
+    }
+};
+
+int sign(int val) {
+    return val == 0 ? 0 : val > 0 ? 1 : -1;
 }
-void part_2() {
-    const std::unordered_map<char, std::pair<int, int>> deltas = {
+
+void follow(const Point &head, Point &tail) {
+    const auto dx = head.x - tail.x;
+    const auto dy = head.y - tail.y;
+    if (std::abs(dx) > 1 || std::abs(dy) > 1) {
+        tail.x += sign(dx);
+        tail.y += sign(dy);
+    }
+}
+
+size_t solve(size_t size) {
+    const std::unordered_map<char, Point> deltas = {
             {'U', {0,  1}},
             {'R', {1,  0}},
             {'D', {0,  -1}},
             {'L', {-1, 0}}
     };
-    std::set<std::pair<int, int>> visited = {{0, 0}};
-    std::vector<std::pair<int, int>> rope(10);
+    std::set<Point> visited = {{0, 0}};
+    std::vector<Point> rope(size);
     char direction;
     int count;
     while (std::cin >> direction >> count) {
         const auto &delta = deltas.at(direction);
-        for (int i = 0; i < count; ++i) {
-            int &x = rope[0].first, &y = rope[0].second;
-            x += delta.first;
-            y += delta.second;
+        while (count > 0) {
+            --count;
+            rope[0].x += delta.x;
+            rope[0].y += delta.y;
             for (size_t j = 1; j < rope.size(); ++j) {
-                int &hx = rope[j - 1].first, &hy = rope[j - 1].second;
-                int &tx = rope[j].first, &ty = rope[j].second;
-                if (hx == tx) {
-                    if (hy - ty < -1) --ty;
-                    else if (hy - ty > 1) ++ty;
-                } else if (hy == ty) {
-                    if (hx - tx < -1) --tx;
-                    else if (hx - tx > 1) ++tx;
-                } else if (std::abs(hy - ty) == 1 && std::abs(hx - tx) > 1) {
-                    ty = hy;
-                    if (hx - tx > 1) ++tx;
-                    else if (hx - tx < -1) --tx;
-                } else if (std::abs(hx - tx) == 1 && std::abs(hy - ty) > 1) {
-                    tx = hx;
-                    if (hy - ty > 1) ++ty;
-                    else if (hy - ty < -1) --ty;
-                } else if (std::abs(hx - tx) == 2 && std::abs(hy - ty) == 2) {
-                    if (tx < hx) tx = hx - 1;
-                    else tx = hx + 1;
-                    if (hy - ty > 1) ++ty;
-                    else if (hy - ty < -1) --ty;
-                }
+                follow(rope[j - 1], rope[j]);
             }
-            visited.insert({rope.back().first, rope.back().second});
+            visited.insert(rope.back());
         }
     }
+    return visited.size();
+}
 
-    std::cout << visited.size() << '\n';
+void part_1() {
+    std::cout << solve(2) << '\n';
+}
+
+void part_2() {
+    std::cout << solve(10) << '\n';
 }
 
 int main() {
-    // part_1(); // 6026
+//     part_1(); // 6026
     part_2(); // 2273
     return 0;
 }
