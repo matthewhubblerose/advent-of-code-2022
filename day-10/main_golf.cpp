@@ -1,2 +1,2 @@
 #include<iostream>
-using namespace std;char i[5];int v,x=1,c,t,p;void a(){if(!p)cout<<'\n';cout<<((x>p-2&x<p+2)?'#':'.');++c;p=c%40;t+=p==20?c*x:0;}int main(){while(cin>>i){a();if(*i!='n'){cin>>v;a();x+=v;}}cout<<t;}
+using namespace std;char i[5];int v,x=1,c,t,p;void a(){if(!p)cout<<'\n';cout<<".#"[x>p-2&x<p+2];p=++c%40;t+=p==20?c*x:0;}int main(){while(cin>>i){a();if(*i&1)cin>>v,a(),x+=v;}cout<<t;}
