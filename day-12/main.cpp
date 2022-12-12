@@ -6,6 +6,7 @@
 struct Point {
     int x, y;
 
+    Point plus(const Point &point) const { return {x + point.x, y + point.y}; }
     bool operator<(const Point &rhs) const { return std::tie(x, y) < std::tie(rhs.x, rhs.y); }
     bool operator==(const Point &rhs) const { return std::tie(x, y) == std::tie(rhs.x, rhs.y); }
     bool operator!=(const Point &rhs) const { return !(rhs == *this); }
@@ -32,6 +33,10 @@ void set(std::vector<std::vector<char>> &grid, const Point &pos, char c) {
     grid[static_cast<size_t>(pos.y)][static_cast<size_t>(pos.x)] = c;
 }
 
+bool contains(std::vector<std::vector<char>> &grid, const Point &pos) {
+    return pos.x >= 0 && static_cast<size_t>(pos.x) < grid[0].size() && pos.y >= 0 && static_cast<size_t>(pos.y) < grid.size();
+}
+
 Point char_pos(const std::vector<std::vector<char>> &grid, char c) {
     for (size_t y = 0; y < grid.size(); ++y) {
         for (size_t x = 0; x < grid[y].size(); ++x) {
@@ -46,11 +51,10 @@ struct Path {
     std::vector<Point> steps;
 };
 
+const std::vector<Point> directions = {{0, 1},{1,0},{0,-1},{-1,0}};
+
 void part_1() {
-    const std::vector<Point> directions = {{0, 1},{1,0},{0,-1},{-1,0}};
     auto grid = parse_grid();
-    const auto height = static_cast<int>(grid.size());
-    const auto width = static_cast<int>(grid[0].size());
     const auto start = char_pos(grid, 'S');
     const auto end = char_pos(grid, 'E');
     set(grid, start, 'a');
@@ -68,16 +72,14 @@ void part_1() {
         visited.insert(path.pos);
         if (path.pos == end) {
             std::cout << path.steps.size() - 1 << '\n';
-            return;
+            break;
         }
 
         for (const auto &dir: directions) {
             const auto cur_pos = path.pos;
-            const auto dst_pos = Point{cur_pos.x + dir.x, cur_pos.y + dir.y};
-            if (dst_pos.x < 0 || dst_pos.x >= width || dst_pos.y < 0 || dst_pos.y >= height) continue;
-            const auto cur_height = get(grid, cur_pos);
-            const auto dst_height = get(grid, dst_pos);
-            if (dst_height <= cur_height + 1) {
+            const auto dst_pos = cur_pos.plus(dir);
+            if (!contains(grid, dst_pos)) continue;
+            if (get(grid, dst_pos) <= get(grid, cur_pos) + 1) {
                 auto steps = path.steps;
                 steps.push_back(dst_pos);
                 pq.push({dst_pos, steps});
@@ -87,10 +89,7 @@ void part_1() {
 }
 
 void part_2() {
-    const std::vector<Point> directions = {{0, 1},{1,0},{0,-1},{-1,0}};
     auto grid = parse_grid();
-    const auto height = static_cast<int>(grid.size());
-    const auto width = static_cast<int>(grid[0].size());
     const auto start = char_pos(grid, 'E');
     set(grid, start, 'z');
 
@@ -104,18 +103,17 @@ void part_2() {
         pq.pop();
         if (visited.contains(path.pos)) continue;
         visited.insert(path.pos);
+
         if (get(grid, path.pos) == 'a') {
             std::cout << path.steps.size() - 1 << '\n';
-            return;
+            break;
         }
 
         for (const auto &dir: directions) {
             const auto cur_pos = path.pos;
-            const auto dst_pos = Point{cur_pos.x + dir.x, cur_pos.y + dir.y};
-            if (dst_pos.x < 0 || dst_pos.x >= width || dst_pos.y < 0 || dst_pos.y >= height) continue;
-            const auto cur_height = get(grid, cur_pos);
-            const auto dst_height = get(grid, dst_pos);
-            if (dst_height >= cur_height - 1) {
+            const auto dst_pos = cur_pos.plus(dir);
+            if (!contains(grid, dst_pos)) continue;
+            if (get(grid, dst_pos) >= get(grid, cur_pos) - 1) {
                 auto steps = path.steps;
                 steps.push_back(dst_pos);
                 pq.push({dst_pos, steps});
@@ -125,7 +123,7 @@ void part_2() {
 }
 
 int main() {
-//    part_1(); // 370
-    part_2(); // 363
+    part_1(); // 370
+//    part_2(); // 363
     return 0;
 }
