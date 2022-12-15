@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <set>
 
 struct Point {
     int x, y;
@@ -14,53 +13,6 @@ struct Point {
 int manhattan_distance(const Point &l, const Point &r) {
     return std::abs(l.x - r.x) + std::abs(l.y - r.y);
 }
-
-void part_1() {
-    auto sensor = Point();
-    auto beacon = Point();
-    auto min_x = std::numeric_limits<int>::max();
-    auto max_x = std::numeric_limits<int>::min();
-    auto pairs = std::vector<std::pair<Point, Point>>();
-
-    const int row = 2000000;
-    auto beacons = std::set<int>();
-    auto sensors = std::set<int>();
-
-    while (std::cin.ignore(12), std::cin >> sensor.x, std::cin.ignore(4), std::cin >> sensor.y, std::cin.ignore(25), std::cin >> beacon.x, std::cin.ignore(4), std::cin >> beacon.y) {
-        std::cin.ignore(1);
-        const auto distance = manhattan_distance(sensor, beacon);
-        min_x = std::min(min_x, std::min(sensor.x - distance, beacon.x));
-        max_x = std::max(max_x, std::max(sensor.x + distance, beacon.x));
-        pairs.emplace_back(std::pair(sensor, beacon));
-        if (beacon.y == row) {
-            beacons.insert(beacon.x);
-        }
-        if (sensor.y == row) {
-            sensors.insert(sensor.x);
-        }
-    }
-
-    auto no_beacons = std::set<int>();
-
-    for (const auto &[s, b]: pairs) {
-        const auto distance = manhattan_distance(s, b);
-        for (int x = min_x; x <= max_x; ++x) {
-            const auto point = Point{x,row};
-            if (manhattan_distance(s, point) <= distance && !beacons.contains(x)) {
-                no_beacons.insert(x);
-            }
-        }
-    }
-
-    std::cout << no_beacons.size() << '\n';
-}
-
-struct SensorRange {
-    Point sensor;
-    int distance;
-    int min_y;
-    int max_y;
-};
 
 class SparseInterval {
 
@@ -87,8 +39,46 @@ public:
         return x;
     }
 
+    int filled() {
+        int count = 0;
+        std::sort(intervals.begin(), intervals.end());
+        int x = intervals[0].first;
+        for (const auto &[min, max]: intervals) {
+            if (x >= min && x < max) count += (max - x);
+            if (x < max) x = max;
+        }
+        return count;
+    }
+
 private:
     std::vector<std::pair<int, int>> intervals;
+};
+
+void part_1() {
+    int sx, sy, bx, by;
+    const int row = 2000000;
+    auto si = SparseInterval(33);
+
+    while (std::cin.ignore(12), std::cin >> sx, std::cin.ignore(4), std::cin >> sy, std::cin.ignore(25), std::cin >> bx, std::cin.ignore(4), std::cin >> by) {
+        std::cin.ignore(1);
+        auto sensor = Point{sx, sy};
+        auto beacon = Point{bx, by};
+        const auto distance = manhattan_distance(sensor, beacon);
+        const auto row_distance = manhattan_distance(sensor, {sensor.x, row});
+        if (row_distance <= distance) {
+            const auto spread = distance - row_distance;
+            si.add(sx - spread, sx + spread);
+        }
+    }
+
+    std::cout << si.filled() << '\n';
+}
+
+struct SensorRange {
+    Point sensor;
+    int distance;
+    int min_y;
+    int max_y;
 };
 
 void part_2() {
@@ -131,7 +121,7 @@ void part_2() {
 }
 
 int main() {
-//    part_1(); // 4725496
-    part_2(); // 12051287042458
+    part_1(); // 4725496
+//    part_2(); // 12051287042458
     return 0;
 }
