@@ -55,65 +55,79 @@ void part_1() {
     std::cout << no_beacons.size() << '\n';
 }
 
-struct Sensed {
+struct SensorRange {
     Point sensor;
     int distance;
+    int min_y;
+    int max_y;
 };
 
-struct SparseRange {
+class SparseInterval {
 
-    std::vector<std::pair<int, int>> ranges;
+public:
+    explicit SparseInterval(size_t capacity) {
+        intervals.reserve(capacity);
+    }
+
+    void reset() {
+        intervals.clear();
+    }
 
     void add(int min, int max) {
-        ranges.emplace_back(min, max);
+        intervals.emplace_back(min, max);
     }
 
     int first_gap() {
-        int val = 0;
-        std::sort(ranges.begin(), ranges.end());
-        for (const auto &r: ranges) {
-            if (val < r.first) return val;
-            else if (r.second + 1 > val) val = r.second + 1;
+        int x = 0;
+        std::sort(intervals.begin(), intervals.end());
+        for (const auto &[min, max]: intervals) {
+            if (x < min) return x;
+            else if (max + 1 > x) x = max + 1;
         }
-        return val;
+        return x;
     }
 
+private:
+    std::vector<std::pair<int, int>> intervals;
 };
 
 void part_2() {
-    auto sensor = Point();
-    auto beacon = Point();
-    auto sensed = std::vector<Sensed>();
-
-    while (std::cin.ignore(12), std::cin >> sensor.x, std::cin.ignore(4), std::cin >> sensor.y, std::cin.ignore(25), std::cin >> beacon.x, std::cin.ignore(4), std::cin >> beacon.y) {
-        std::cin.ignore(1);
-        sensed.push_back({sensor, manhattan_distance(sensor, beacon)});
-    }
+    int sx, sy, bx, by;
+    auto sensors = std::vector<SensorRange>();
 
     const auto size = 4000000;
+    while (std::cin.ignore(12), std::cin >> sx, std::cin.ignore(4), std::cin >> sy, std::cin.ignore(25), std::cin >> bx, std::cin.ignore(4), std::cin >> by) {
+        std::cin.ignore(1);
+        const auto sensor = Point{sx, sy};
+        const auto beacon = Point{bx, by};
+        const auto distance = manhattan_distance(sensor, beacon);
+        const auto min_y = std::max(sy - distance, 0);
+        const auto max_y = std::min(sy + distance, size);
+        sensors.push_back({sensor, distance, min_y, max_y});
+    }
+
+    auto si = SparseInterval(sensors.size());
     for (int y = 0; y <= size; ++y) {
-        auto sr = SparseRange();
-        for (const auto &s: sensed) {
-            const auto &sen = s.sensor;
-            const auto x = sen.x;
-            const auto p = Point{x, y};
-            const auto distance = manhattan_distance(p, sen);
-            if (distance <= s.distance) {
-                const auto spread = s.distance - distance;
+        si.reset();
+        for (const auto &sensor_range: sensors) {
+            if (y < sensor_range.min_y || y > sensor_range.max_y) continue;
+            const auto x = sensor_range.sensor.x;
+            const auto distance = manhattan_distance(Point{x, y}, sensor_range.sensor);
+            if (distance <= sensor_range.distance) {
+                const auto spread = sensor_range.distance - distance;
                 const auto min_x = std::max(x - spread, 0);
                 const auto max_x = std::min(x + spread, size);
-                sr.add(min_x, max_x);
+                si.add(min_x, max_x);
             }
         }
-        int gap = sr.first_gap();
-        if (gap <= size) {
-            const auto ans = (static_cast<uint64_t>(gap) * static_cast<uint64_t>(4000000)) + static_cast<uint64_t>(y);
-            std::cout << ans << '\n';
+        const int x = si.first_gap();
+        if (x <= size) {
+            std::cout << (static_cast<uint64_t>(x) * 4000000) + static_cast<uint64_t>(y) << '\n';
             return;
         }
     }
 
-    std::cout << "Oops" << '\n';
+    assert(false);
 }
 
 int main() {
